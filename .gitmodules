@@ -1,0 +1,4 @@
+[submodule "Plugins/ClientPrediction"]
+	path = Plugins/ClientPrediction
+	url = https://github.com/BlueSpud/ClientPrediction.git
+	branch = main
