@@ -3,7 +3,7 @@
 
 #include "BallPawn.h"
 
-#include "ClientPredictionPhysicsModel.h"
+#include "BallClientPredictionModel.h"
 
 // Sets default values
 ABallPawn::ABallPawn()
@@ -13,7 +13,7 @@ ABallPawn::ABallPawn()
 
 	PhysicsComponent = CreateDefaultSubobject<UClientPredictionComponent>(TEXT("PhysicsComponent"));
 
-	ClientPredictionPhysicsModel* Model = PhysicsComponent->CreateModel<ClientPredictionPhysicsModel>();
+	BallClientPredictionModel* Model = PhysicsComponent->CreateModel<BallClientPredictionModel>();
 	Model->InputDelegate.BindUObject(this, &ABallPawn::ProduceInput);
 	
 	bReplicates = true;
