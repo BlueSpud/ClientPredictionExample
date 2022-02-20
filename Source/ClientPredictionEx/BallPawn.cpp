@@ -3,15 +3,19 @@
 
 #include "BallPawn.h"
 
+#include "ClientPredictionPhysicsModel.h"
+
 // Sets default values
 ABallPawn::ABallPawn()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	PhysicsComponent = CreateDefaultSubobject<UClientPredictionPhysicsComponent>(TEXT("PhysicsComponent"));
-	PhysicsComponent->InputDelegate.BindUObject(this, &ABallPawn::ProduceInput);
+	PhysicsComponent = CreateDefaultSubobject<UClientPredictionComponent>(TEXT("PhysicsComponent"));
 
+	ClientPredictionPhysicsModel* Model = PhysicsComponent->CreateModel<ClientPredictionPhysicsModel>();
+	Model->InputDelegate.BindUObject(this, &ABallPawn::ProduceInput);
+	
 	bReplicates = true;
 }
 

@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 
-#include "ClientPredictionPhysicsComponent.h"
+#include "ClientPredictionPhysics.h"
+#include "ClientPredictionComponent.h"
 
 #include "BallPawn.generated.h"
 
@@ -30,12 +31,11 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-
-	UFUNCTION()
+	
 	void ProduceInput(FInputPacket& Packet);
 
 	UPROPERTY(EditDefaultsOnly)
-	UClientPredictionPhysicsComponent* PhysicsComponent;
+	UClientPredictionComponent* PhysicsComponent;
 	
 	
 };
