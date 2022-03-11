@@ -3,8 +3,6 @@
 
 #include "BallPawn.h"
 
-#include "BallClientPredictionModel.h"
-
 // Sets default values
 ABallPawn::ABallPawn()
 {

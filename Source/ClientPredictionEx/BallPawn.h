@@ -8,6 +8,8 @@
 #include "ClientPredictionPhysics.h"
 #include "ClientPredictionComponent.h"
 
+#include "BallClientPredictionModel.h"
+
 #include "BallPawn.generated.h"
 
 UCLASS()
