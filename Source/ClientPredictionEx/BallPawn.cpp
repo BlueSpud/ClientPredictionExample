@@ -38,6 +38,7 @@ void ABallPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	
 	InputComponent->BindAxis(TEXT("Jump"));
 	InputComponent->BindAxis(TEXT("Move"));
+	InputComponent->BindAxis(TEXT("Strafe"));
 }
 
 void ABallPawn::ProduceInput(FInputPacket& Packet) {
@@ -46,8 +47,12 @@ void ABallPawn::ProduceInput(FInputPacket& Packet) {
 	}
 
 	FRotator ControlRotation = GetControlRotation();
-	FVector Forward = ControlRotation.Vector() *  GetInputAxisValue(TEXT("Move"));
-	Packet.ForceVector = FVector(Forward.X, Forward.Y, 0.0);
+	FVector Unprojected = ControlRotation.Vector();
+	
+	FVector Forward = FVector(Unprojected.X, Unprojected.Y, 0.0);
+	FVector Right = FVector::CrossProduct(FVector(0.0, 0.0, 1.0), Forward);
+	
+	Packet.ForceVector = Forward * GetInputAxisValue(TEXT("Move")) + Right * GetInputAxisValue(TEXT("Strafe"));
 	Packet.bIsApplyingForce = GetInputAxisValue(TEXT("Jump")) == 1.0;
 }
 
