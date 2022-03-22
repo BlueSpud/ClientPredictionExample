@@ -17,5 +17,5 @@ struct FInputPacket {
 
 class BallClientPredictionModel : public BaseClientPredictionPhysicsModel<FInputPacket, FEmptyState> {
 protected:
-	virtual void Simulate(Chaos::FReal Dt, UPrimitiveComponent* Component, const FEmptyState& PrevState, FEmptyState& OutState, const FInputPacket& Input) override;
+	virtual void Simulate(Chaos::FReal Dt, UPrimitiveComponent* Component, ImmediatePhysics::FActorHandle* Handle, const FEmptyState& PrevState, FEmptyState& OutState, const FInputPacket& Input) override;
 };
