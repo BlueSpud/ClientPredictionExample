@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 
-#include "ClientPredictionPhysics.h"
+#include "ClientPredictionPhysicsDeclares.h"
 #include "ClientPredictionComponent.h"
 
 #include "BallClientPredictionModel.h"
