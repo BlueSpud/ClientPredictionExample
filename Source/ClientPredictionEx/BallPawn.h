@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 
-#include "ClientPredictionPhysicsDeclares.h"
+#include "Physics/ClientPredictionPhysicsDeclares.h"
 #include "ClientPredictionComponent.h"
 
 #include "BallClientPredictionModel.h"
@@ -32,12 +32,16 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintNativeEvent)
+	void OnGroundChanged(bool bIsOnGround);
+	
 private:
 	
 	void ProduceInput(FInputPacket& Packet);
+	
+	void FinalizeSim(const FBallState& State);
 
 	UPROPERTY(EditDefaultsOnly)
 	UClientPredictionComponent* PhysicsComponent;
-	
 	
 };

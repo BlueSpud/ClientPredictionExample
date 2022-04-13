@@ -13,6 +13,7 @@ ABallPawn::ABallPawn()
 
 	BallClientPredictionModel* Model = PhysicsComponent->CreateModel<BallClientPredictionModel>();
 	Model->InputDelegate.BindUObject(this, &ABallPawn::ProduceInput);
+	Model->OnFinalized.BindUObject(this, &ABallPawn::FinalizeSim);
 	
 	bReplicates = true;
 }
@@ -41,6 +42,8 @@ void ABallPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAxis(TEXT("Strafe"));
 }
 
+void ABallPawn::OnGroundChanged_Implementation(bool bIsOnGround) { /* No-op */ }
+
 void ABallPawn::ProduceInput(FInputPacket& Packet) {
 	if (InputComponent == nullptr) {
 		return;
@@ -54,5 +57,9 @@ void ABallPawn::ProduceInput(FInputPacket& Packet) {
 	
 	Packet.ForceVector = Forward * GetInputAxisValue(TEXT("Move")) + Right * GetInputAxisValue(TEXT("Strafe"));
 	Packet.bIsApplyingForce = GetInputAxisValue(TEXT("Jump")) == 1.0;
+}
+
+void ABallPawn::FinalizeSim(const FBallState& State) {
+	OnGroundChanged(State.bIsOnGround);
 }
 
