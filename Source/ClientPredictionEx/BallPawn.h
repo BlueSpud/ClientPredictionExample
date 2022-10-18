@@ -37,11 +37,10 @@ public:
 	
 private:
 	
-	void ProduceInput(FInputPacket& Packet);
+	void ProduceInput(FInputPacket& Packet, const BallClientPredictionModel::StateType& State, Chaos::FReal Dt);
 	
-	void FinalizeSim(const FBallState& State);
+	void FinalizeSim(const BallClientPredictionModel::StateType& State, const float Dt);
 
 	UPROPERTY(EditDefaultsOnly)
 	UClientPredictionComponent* PhysicsComponent;
-	
 };

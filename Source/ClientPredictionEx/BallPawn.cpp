@@ -44,7 +44,7 @@ void ABallPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ABallPawn::OnGroundChanged_Implementation(bool bIsOnGround) { /* No-op */ }
 
-void ABallPawn::ProduceInput(FInputPacket& Packet) {
+void ABallPawn::ProduceInput(FInputPacket& Packet, const BallClientPredictionModel::StateType& State, Chaos::FReal Dt) {
 	if (InputComponent == nullptr) {
 		return;
 	}
@@ -59,7 +59,7 @@ void ABallPawn::ProduceInput(FInputPacket& Packet) {
 	Packet.bIsApplyingForce = GetInputAxisValue(TEXT("Jump")) == 1.0;
 }
 
-void ABallPawn::FinalizeSim(const FBallState& State) {
-	OnGroundChanged(State.bIsOnGround);
+void ABallPawn::FinalizeSim(const BallClientPredictionModel::StateType& State, const float Dt) {
+	OnGroundChanged(State.State.bIsOnGround);
 }
 
