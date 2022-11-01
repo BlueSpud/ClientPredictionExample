@@ -50,5 +50,6 @@ public:
 	using StateType = FPhysicsStateWrapper<FBallState>;
 
 protected:
-	virtual void Simulate(Chaos::FReal Dt, UPrimitiveComponent* Component, const FPhysicsContext& Context, const FBallState& PrevState, SimOutput& OutState, const FInputPacket& Input) override;
+	virtual void SimulatePhysics(Chaos::FReal Dt, UPrimitiveComponent* Component, FPhysicsContext& Context, const FBallState& PrevState, SimOutput& Output, const FInputPacket& Input) override;
+	virtual void PostSimulatePhysics(Chaos::FReal Dt, UPrimitiveComponent* Component, const FPhysicsContext& Context, const FBallState& PrevState, SimOutput& Output, const FInputPacket& Input) override;
 };

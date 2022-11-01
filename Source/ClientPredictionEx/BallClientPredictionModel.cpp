@@ -1,6 +1,6 @@
 ﻿#include "BallClientPredictionModel.h"
 
-void BallClientPredictionModel::Simulate(Chaos::FReal Dt, UPrimitiveComponent* Component, const FPhysicsContext& Context, const FBallState& PrevState, SimOutput& OutState, const FInputPacket& Input) {
+void BallClientPredictionModel::SimulatePhysics(Chaos::FReal Dt, UPrimitiveComponent* Component, FPhysicsContext& Context, const FBallState& PrevState, SimOutput& Output, const FInputPacket& Input) {
 	if (Input.bIsApplyingForce) {
 		Context.AddForce(Chaos::FVec3(0.0, 0.0, 1000000.0));
 	}
@@ -9,10 +9,14 @@ void BallClientPredictionModel::Simulate(Chaos::FReal Dt, UPrimitiveComponent* C
 		Context.AddForce(Input.ForceVector.GetSafeNormal() * 1000000.0);
 	}
 
+	
+}
+
+void BallClientPredictionModel::PostSimulatePhysics(Chaos::FReal Dt, UPrimitiveComponent* Component, const FPhysicsContext& Context, const FBallState& PrevState, SimOutput& Output, const FInputPacket& Input) {
 	FTransform BallTransform = Context.GetTransform();
 	FVector Start = BallTransform.GetLocation();
 	FVector End   = Start + FVector(0.0, 0.0, -100.0);
 
 	FHitResult Result;
-	OutState.State().bIsOnGround = Context.LineTraceSingle(Result, Start, End);
+	Output.State().bIsOnGround = Context.LineTraceSingle(Result, Start, End);
 }
