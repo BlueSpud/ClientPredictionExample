@@ -9,7 +9,7 @@ struct FInputPacket {
 	/** Temporary test input */
 	bool bIsApplyingForce = false;
 
-	FVector ForceVector;
+	FVector ForceVector = FVector::ZeroVector;
 
 	void NetSerialize(FArchive& Ar) {
 		Ar << bIsApplyingForce;
@@ -21,15 +21,15 @@ struct FBallState {
 
 	// true if the ball is on the ground, false otherwise.
 	bool bIsOnGround = false;
-	
+
 	void NetSerialize(FArchive& Ar) {
 		Ar << bIsOnGround;
 	}
-	
+
 	void Rewind(class UPrimitiveComponent* Component) const {
 		// No-op, no special logic
 	}
-	
+
 	void Interpolate(float Alpha, const FBallState& Other) {
 		// No-op, always use this state's value
 	}
@@ -37,11 +37,11 @@ struct FBallState {
 	void Print(FAnsiStringBuilderBase& Builder) const {
 		// TODO implement
 	}
-	
+
 	bool operator ==(const FBallState& Other) const {
 		return Other.bIsOnGround == bIsOnGround;
 	}
-	
+
 };
 
 class BallClientPredictionModel : public BaseClientPredictionPhysicsModel<FInputPacket, FBallState, EBallCueSet> {

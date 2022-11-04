@@ -20,12 +20,13 @@ ABallPawn::ABallPawn() {
 // Called when the game starts or when spawned
 void ABallPawn::BeginPlay() {
 	Super::BeginPlay();
+	SetReplicateMovement(false);
 }
 
 // Called to bind functionality to input
 void ABallPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	
+
 	InputComponent->BindAxis(TEXT("Jump"));
 	InputComponent->BindAxis(TEXT("Move"));
 	InputComponent->BindAxis(TEXT("Strafe"));
@@ -38,12 +39,12 @@ void ABallPawn::ProduceInput(FInputPacket& Packet, const BallClientPredictionMod
 		return;
 	}
 
-	FRotator ControlRotation = GetControlRotation();
-	FVector Unprojected = ControlRotation.Vector();
-	
-	FVector Forward = FVector(Unprojected.X, Unprojected.Y, 0.0);
-	FVector Right = FVector::CrossProduct(FVector(0.0, 0.0, 1.0), Forward);
-	
+	const FRotator ControlRotation = GetControlRotation();
+	const FVector Unprojected = ControlRotation.Vector();
+
+	const FVector Forward = FVector(Unprojected.X, Unprojected.Y, 0.0);
+	const FVector Right = FVector::CrossProduct(FVector(0.0, 0.0, 1.0), Forward);
+
 	Packet.ForceVector = Forward * GetInputAxisValue(TEXT("Move")) + Right * GetInputAxisValue(TEXT("Strafe"));
 	Packet.bIsApplyingForce = GetInputAxisValue(TEXT("Jump")) == 1.0;
 }
