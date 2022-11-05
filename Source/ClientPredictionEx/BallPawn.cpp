@@ -32,7 +32,7 @@ void ABallPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	InputComponent->BindAxis(TEXT("Strafe"));
 }
 
-void ABallPawn::OnGroundChanged_Implementation(bool bIsOnGround) { /* No-op */ }
+void ABallPawn::OnGroundChanged_Implementation(bool bIsOnGround, bool bIsFullState) { /* No-op */ }
 
 void ABallPawn::ProduceInput(FInputPacket& Packet, const BallClientPredictionModel::StateType& State, Chaos::FReal Dt) {
 	if (InputComponent == nullptr) {
@@ -50,6 +50,6 @@ void ABallPawn::ProduceInput(FInputPacket& Packet, const BallClientPredictionMod
 }
 
 void ABallPawn::FinalizeSim(const BallClientPredictionModel::StateType& State, const float Dt) {
-	OnGroundChanged(State.State.bIsOnGround);
+	OnGroundChanged(State.State.bIsOnGround, State.State.bIsFullState);
 }
 

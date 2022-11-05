@@ -25,18 +25,18 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintNativeEvent)
-	void OnGroundChanged(bool bIsOnGround);
-	
+	void OnGroundChanged(bool bIsOnGround, bool bIsFullState);
+
 private:
-	
+
 	void ProduceInput(FInputPacket& Packet, const BallClientPredictionModel::StateType& State, Chaos::FReal Dt);
-	
+
 	void FinalizeSim(const BallClientPredictionModel::StateType& State, const float Dt);
 
 	UPROPERTY(EditDefaultsOnly)

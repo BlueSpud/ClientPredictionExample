@@ -19,11 +19,20 @@ struct FInputPacket {
 
 struct FBallState {
 
-	// true if the ball is on the ground, false otherwise.
+	/** true if the ball is on the ground, false otherwise. */
 	bool bIsOnGround = false;
 
-	void NetSerialize(FArchive& Ar) {
+    /** Boolean to demonstrate how bSerializeFullState is used */
+	bool bIsFullState = true;
+
+	/**
+	 * bSerializeFullState can be used to avoid sending extra data to simulated proxies.
+	 * If it is false, that data shouldn't be serialized. You should ensure that if bSerializeFullState,
+	 * the other values on the state are default initialized / set to reasonable values.
+	 */
+	void NetSerialize(FArchive& Ar, bool bSerializeFullState) {
 		Ar << bIsOnGround;
+		bIsFullState = bSerializeFullState;
 	}
 
 	void Rewind(class UPrimitiveComponent* Component) const {
