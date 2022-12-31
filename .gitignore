@@ -15,3 +15,5 @@ Build
 *.xcodeproj
 *.xcworkspace
 .idea
+.vsconfig
+ClientPredictionEx.sln.DotSettings.user
