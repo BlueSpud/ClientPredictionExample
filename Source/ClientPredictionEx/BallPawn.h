@@ -28,11 +28,11 @@ struct FBallPawnState {
 
     float Brightness = 1.0;
 
-    void NetSerialize(FArchive& Ar, bool bSerializeFullState) {
+    void NetSerialize(FArchive& Ar, const ClientPrediction::EDataCompleteness Completeness) {
         Ar << bIsOnGround;
         Ar << Brightness;
 
-        bIsFullState = bSerializeFullState;
+        bIsFullState = Completeness == ClientPrediction::EDataCompleteness::kFull;
     }
 
     bool ShouldReconcile(const FBallPawnState& Other) const {
