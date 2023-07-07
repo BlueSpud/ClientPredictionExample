@@ -82,7 +82,7 @@ public:
 private:
     void ProduceInput(FBallPawnInputPacket& Packet);
     void FinalizeSim(const FBallPawnState& State, Chaos::FReal Dt);
-    void HandleEvent(ETestEvents Event, const FBallPawnState& State, const ClientPrediction::FPhysicsState& PhysState, const ClientPrediction::FDelayInfo&);
+    void HandleEvent(ETestEvents Event, const FBallPawnState& State, const ClientPrediction::FPhysicsState& PhysState, const Chaos::FReal EstimatedWorldDelay);
 
     UPROPERTY(EditDefaultsOnly)
     UClientPredictionComponent* PhysicsComponent;

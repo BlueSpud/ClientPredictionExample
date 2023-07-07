@@ -83,7 +83,7 @@ void ABallPawn::FinalizeSim(const FBallPawnState& State, Chaos::FReal Dt) {
 	OnGroundChanged(State.bIsOnGround, State.bIsFullState, State.Brightness);
 }
 
-void ABallPawn::HandleEvent(ETestEvents Event, const FBallPawnState& State, const ClientPrediction::FPhysicsState& PhysState, const ClientPrediction::FDelayInfo& DelayInfo) {
+void ABallPawn::HandleEvent(ETestEvents Event, const FBallPawnState& State, const ClientPrediction::FPhysicsState& PhysState, const Chaos::FReal EstimatedWorldDelay) {
 	switch (Event) {
 	case ETestEvents::kLanding:
 		OnHitGround();
