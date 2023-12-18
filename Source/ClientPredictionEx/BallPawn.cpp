@@ -28,19 +28,20 @@ void FBallPawnModel::SimulatePostPhysics(Chaos::FReal Dt, const ClientPrediction
 	}
 }
 
-// Sets default values
 ABallPawn::ABallPawn() {
-	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 	PhysicsComponent = CreateDefaultSubobject<UClientPredictionComponent>(TEXT("PhysicsComponent"));
+}
+
+void ABallPawn::PostRegisterAllComponents() {
+	Super::PostRegisterAllComponents();
 
 	auto* Model = PhysicsComponent->CreateModel<FBallPawnModel>();
 	Model->ProduceInputDelegate.BindUObject(this, &ABallPawn::ProduceInput);
 	Model->FinalizeDelegate.BindUObject(this, &ABallPawn::FinalizeSim);
 	Model->DispatchEventDelegate.BindUObject(this, &ABallPawn::HandleEvent);
-
-	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
