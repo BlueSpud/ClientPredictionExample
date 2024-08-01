@@ -1,53 +1,32 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "BallPawn.h"
 
-void FBallPawnModel::SimulatePrePhysics(Chaos::FReal Dt, ClientPrediction::FPhysicsContext& Context, const FBallPawnInputPacket& Input, const FBallPawnState& PrevState,
-                                        SimOutput& OutState) {
-	if (Input.bIsApplyingForce) {
-		Context.AddForce(Chaos::FVec3(0.0, 0.0, 1000000.0));
-	}
-
-	if (Input.ForceVector.Size() > 0.0) {
-		Context.AddForce(Input.ForceVector.GetSafeNormal() * 1000000.0);
-	}
-}
-
-void FBallPawnModel::SimulatePostPhysics(Chaos::FReal Dt, const ClientPrediction::FPhysicsContext& Context, const FBallPawnInputPacket& Input,
-                                         const FBallPawnState& PrevState, SimOutput& OutState) {
-	FTransform BallTransform = Context.GetTransform();
-	FVector Start = BallTransform.GetLocation();
-	FVector End = Start + FVector(0.0, 0.0, -100.0);
-
-	FHitResult Result;
-	OutState.State().bIsOnGround = Context.LineTraceSingle(Result, Start, End);
-	OutState.State().Brightness = FMath::Clamp(Context.GetLinearVelocity().Size() / 5000.0, 0.0, 1.0);
-
-	if (!PrevState.bIsOnGround && OutState.State().bIsOnGround) {
-		OutState.DispatchEvent(kLanding);
-	}
-}
+#include "PhysicsProxy/SingleParticlePhysicsProxy.h"
 
 ABallPawn::ABallPawn() {
 	PrimaryActorTick.bCanEverTick = true;
-	bReplicates = true;
+	SetReplicates(true);
 
-	PhysicsComponent = CreateDefaultSubobject<UClientPredictionComponent>(TEXT("PhysicsComponent"));
+	ClientPredictionComponent = CreateDefaultSubobject<UClientPredictionV2Component>(TEXT("ClientPredictionComponent"));
+}
+
+void ABallPawn::PostInitProperties() {
+	Super::PostInitProperties();
+
+	SetReplicatingMovement(false);
 }
 
 void ABallPawn::PostRegisterAllComponents() {
 	Super::PostRegisterAllComponents();
 
-	auto* Model = PhysicsComponent->CreateModel<FBallPawnModel>();
-	Model->ProduceInputDelegate.BindUObject(this, &ABallPawn::ProduceInput);
-	Model->FinalizeDelegate.BindUObject(this, &ABallPawn::FinalizeSim);
-	Model->DispatchEventDelegate.BindUObject(this, &ABallPawn::HandleEvent);
-}
+	auto Delegates = ClientPredictionComponent->CreateSimulation<FBallPawnTraits>();
+	Delegates->ProduceInputGTDelegate.AddUObject(this, &ABallPawn::ProduceInput);
 
-// Called when the game starts or when spawned
-void ABallPawn::BeginPlay() {
-	Super::BeginPlay();
-	SetReplicateMovement(false);
+	Delegates->SimTickPrePhysicsDelegate.AddUObject(this, &ABallPawn::SimTickPrePhysicsDelegate);
+	Delegates->SimTickPostPhysicsDelegate.AddUObject(this, &ABallPawn::SimTickPostPhysicsDelegate);
+
+	Delegates->FinalizeDelegate.AddUObject(this, &ABallPawn::FinalizeSim);
+
+	Delegates->RegisterEvent<FBallPawnHitGroundEvent>().AddUFunction(this, TEXT("OnHitGround"));
 }
 
 // Called to bind functionality to input
@@ -80,16 +59,55 @@ void ABallPawn::ProduceInput(FBallPawnInputPacket& Packet) {
 	Packet.bIsApplyingForce = GetInputAxisValue(TEXT("Jump")) == 1.0;
 }
 
-void ABallPawn::FinalizeSim(const FBallPawnState& State, Chaos::FReal Dt) {
-	OnGroundChanged(State.bIsOnGround, State.bIsFullState, State.Brightness);
+void ABallPawn::SimTickPrePhysicsDelegate(const ClientPrediction::FSimTickInfo& TickInfo, const FBallPawnInputPacket& Input, const FBallPawnState& PrevState,
+                                          ClientPrediction::FTickOutput<FBallPawnState>& Output) {
+	Chaos::FRigidBodyHandle_Internal* Handle = GetPhysHandle(TickInfo);
+	if (Handle == nullptr) { return; }
+
+	if (Input.bIsApplyingForce) {
+		Handle->AddForce(Chaos::FVec3(0.0, 0.0, 1000000.0));
+	}
+
+	if (Input.ForceVector.Size() > 0.0) {
+		Handle->AddForce(Input.ForceVector.GetSafeNormal() * 1000000.0);
+	}
 }
 
-void ABallPawn::HandleEvent(ETestEvents Event, const FBallPawnState& State, const ClientPrediction::FPhysicsState& PhysState, const Chaos::FReal EstimatedWorldDelay) {
-	switch (Event) {
-	case ETestEvents::kLanding:
-		OnHitGround();
-		break;
-	default:
-		break;
-	};
+void ABallPawn::SimTickPostPhysicsDelegate(const ClientPrediction::FSimTickInfo& TickInfo, const FBallPawnInputPacket& Input, const FBallPawnState& PrevState,
+                                           ClientPrediction::FTickOutput<FBallPawnState>& Output) {
+	Chaos::FRigidBodyHandle_Internal* Handle = GetPhysHandle(TickInfo);
+	if (Handle == nullptr) { return; }
+
+	const UWorld* World = TickInfo.UpdatedComponent->GetWorld();
+	if (World == nullptr) { return; }
+
+	FTransform BallTransform = {Handle->R(), Handle->X()};
+	FVector Start = BallTransform.GetLocation();
+	FVector End = Start + FVector(0.0, 0.0, -100.0);
+
+	FCollisionQueryParams QueryParams = FCollisionQueryParams::DefaultQueryParam;
+	QueryParams.AddIgnoredActor(TickInfo.UpdatedComponent->GetOwner());
+	QueryParams.bTraceComplex = false;
+
+	FHitResult Result;
+	Output.State.bIsOnGround = World->LineTraceSingleByChannel(Result, Start, End, ECC_WorldStatic, QueryParams);
+	Output.State.Brightness = FMath::Clamp(Handle->V().Size() / 5000.0, 0.0, 1.0);
+
+	if (!PrevState.bIsOnGround && Output.State.bIsOnGround) {
+		Output.DispatchEvent<FBallPawnHitGroundEvent>({});
+	}
+}
+
+Chaos::FRigidBodyHandle_Internal* ABallPawn::GetPhysHandle(const ClientPrediction::FSimTickInfo& TickInfo) {
+	FBodyInstance* BodyInstance = TickInfo.UpdatedComponent->GetBodyInstance();
+	if (BodyInstance == nullptr) { return nullptr; }
+
+	FPhysicsActorHandle Actor = BodyInstance->GetPhysicsActorHandle();
+	if (Actor == nullptr) { return nullptr; }
+
+	return Actor->GetPhysicsThreadAPI();
+}
+
+void ABallPawn::FinalizeSim(const FBallPawnState& State, Chaos::FReal Dt) {
+	OnGroundChanged(State.bIsOnGround, State.bIsFullState, State.Brightness);
 }
